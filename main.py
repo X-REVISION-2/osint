@@ -22,6 +22,16 @@ def index():
     app.static_folder="./"
     return send_from_directory(app.static_folder, "index.html")
 
+# ----------------------- NMAP --------------------------
+@app.route("/nmap", methods=["POST"])
+def network_map():
+    args = request.json.get("args")
+    range = request.json.get("range")
+    try:
+        result = subprocess.run(["nmap", args, range], capture_output=True, text=True, timeout=15)
+        return jsonify({"output": result.stdout})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 # -------------------- HASH / DEHASH --------------------
 @app.route("/hash", methods=["POST"])

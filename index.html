@@ -43,7 +43,6 @@ canvas {
 header {
   padding: 16px 24px;
   background: rgba(72, 26, 137, 0.35);
-  box-shadow: 0 0 15px #673ab7;
   font-size: 1.4rem;
   letter-spacing: 1px;
 }
@@ -61,10 +60,13 @@ main {
 .panel {
   background: rgba(72, 26, 137, 0.35);
   border-radius: 8px;
-  box-shadow: 0 0 12px rgba(103,58,183,0.6);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.scroll-y {
+  overflow-y: auto;
 }
 
 .panel h2 {
@@ -84,7 +86,6 @@ main {
   white-space: pre-wrap;
   background: rgba(0,0,0,0.6);
   font-size: 0.9rem;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
 }
 
 /* ---------- Optional scrollbar polish ---------- */
@@ -162,7 +163,6 @@ main {
   background: rgba(72, 26, 137, 0.45);
   color: #9f8cff;
   border-radius: 6px;
-  box-shadow: 0 0 6px rgba(159, 140, 255, 0.4);
   cursor: pointer;
   text-decoration: none;
   user-select: none;
@@ -172,7 +172,6 @@ main {
 .node:hover {
   background: #9f8cff;
   color: #000;
-  box-shadow: 0 0 20px #9f8cff;
 }
 
 /* Folder vs link clarity */
@@ -195,7 +194,7 @@ main {
 
   <main>
     <!-- LEFT: TREE -->
-    <div class="panel">
+    <div class="panel scroll-y">
       <h2>OSINT Knowledge Tree</h2>
       <div class="tree-wrapper">
         <div class="tree-container">
@@ -2376,9 +2375,8 @@ main {
           </li>
           </ul>
           </li>
-          <li>
-          <a class="node" href="./uhc_osint.html">UHC OSINT</a>
-          </li>
+          <li><a class="node" href="./uhc_osint.html">UHC OSINT</a></li>
+          <li><a class="node" href="./net_tools.html">Network Tools</a></li>
           </ul>
           </div>
 
