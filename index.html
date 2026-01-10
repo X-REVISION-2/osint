@@ -42,7 +42,7 @@ canvas {
 /* ---------- Header ---------- */
 header {
   padding: 16px 24px;
-  background: rgba(72, 26, 137, 0.35);
+  background: #000;
   font-size: 1.4rem;
   letter-spacing: 1px;
 }
@@ -58,22 +58,21 @@ main {
 
 /* ---------- Panels ---------- */
 .panel {
-  background: rgba(72, 26, 137, 0.35);
+  background: #000;
+  border: 1px solid #6200ff;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.scroll-y {
-  overflow-y: auto;
-}
+
 
 .panel h2 {
   margin: 0;
   padding: 12px 14px;
   font-size: 1.05rem;
-  color: #b388ff;
+  color: #6200ff;
   border-bottom: 1px solid rgba(179,136,255,0.25);
 }
 
@@ -94,11 +93,11 @@ main {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(103,58,183,0.7);
+  background: #6200ff;
   border-radius: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.4);
+  background: #000;
 }
 
 /* Base tree layout */
@@ -122,7 +121,7 @@ main {
   top: 0;
   width: 2px;
   height: 100%;
-  background: rgba(72, 26, 137, 0.4);
+  background: #000;
 }
 
 .tree li::after {
@@ -132,7 +131,7 @@ main {
   top: 18px;
   width: 20px;
   height: 2px;
-  background: rgba(72, 26, 137, 0.4);
+  background: #000;
 }
 
 .tree > li::before {
@@ -160,8 +159,9 @@ main {
 .node {
   display: inline-block;
   padding: 6px 18px;
-  background: rgba(72, 26, 137, 0.45);
-  color: #9f8cff;
+  background: #000;
+  color: #6200ff;
+  border: 1px solid #6200ff;
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
@@ -170,7 +170,7 @@ main {
 }
 
 .node:hover {
-  background: #9f8cff;
+  background: #6200ff;
   color: #000;
 }
 
@@ -182,7 +182,28 @@ main {
 .tree li:not(:has(> ul)) > .node {
   opacity: 0.85;
 }
+.scroll-y {
+  overflow-y: auto;
+}
 
+/* Align status labels and values in two columns */
+#status-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  align-items: center;
+}
+
+.status-item {
+  grid-column: 1;
+  text-align: left;
+  display: block;
+}
+.status-value {
+  grid-column: 2;
+  text-align: right;
+  display: block;
+}
 </style>
 </head>
 
@@ -2375,8 +2396,11 @@ main {
           </li>
           </ul>
           </li>
-          <li><a class="node" href="./uhc_osint.html">UHC OSINT</a></li>
+          <li><a class="node" href="./web_utils.html">Web Utils</a></li>
           <li><a class="node" href="./net_tools.html">Network Tools</a></li>
+          <li><a class="node" href="./file_utils.html">File Utils</a></li>
+          <li><a class="node" href="./google_hacks.html">Google Hacks</a></li>
+          <li><a class="node" href="./shell.html">Shell</a></li>
           </ul>
           </div>
 
@@ -2384,11 +2408,30 @@ main {
       </div>
     </div>
 
-    <!-- RIGHT: CONTEXT / OUTPUT -->
-    <div class="panel">
-      <h2>Context / Output</h2>
-      <div class="output" id="output">
-        Select a node to display notes, commands, or results here…
+    <!-- RIGHT: CONTEXT / OUTPUT (split top/bottom) -->
+    <div class="right-column" style="display: grid; grid-template-rows: auto 1fr; gap: 16px;">
+      <div class="panel">
+      <h2>Status</h2>
+      <div class="output" id="status-panel">
+        <span class="status-item" style="color: #756f79;">IP:</span>
+        <span class="status-value" id="ip-value" style="color: #f0f0ff;">[IP]</span>
+        <span class="status-item" style="color: #756f79;">Version:</span>
+        <span class="status-value" id="version-value" style="color: #f0f0ff;">[Version]</span>
+        <span class="status-item" style="color: #756f79;">Internet Connection:</span>
+        <span class="status-value" id="internet-connection-value" style="color: #756f79;">[Internet Connection]</span>
+      </div>
+      </div>
+
+      <div class="panel">
+      <h2>About</h2>
+      <div class="output scroll-y" id="about-panel">
+        This is the OSINT Tool Navigator, a curated collection of online open source intelligence (OSINT) tools and resources.<br>
+
+        Click on folder nodes to expand/collapse categories. Click on leaf nodes (links) to open the tool/resource in a new page.<br>
+
+        Tools/resources marked with (T) are free tools that can be downloaded and run locally. Tools/resources marked with (R) use AI or machine learning.<br>
+
+        UI Created by ChatGPT.<br>
       </div>
     </div>
   </main>
@@ -2410,6 +2453,26 @@ document.querySelectorAll('.tree .node').forEach(node => {
     // else: leaf node → browser follows link normally
   });
 });
+
+// get status info from backend /status endpoint
+  fetch('/status')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('ip-value').textContent = data.ip || 'N/A';
+      document.getElementById('version-value').textContent = data.version || 'N/A';
+      document.getElementById('internet-connection-value').textContent = data.internet_connection ? 'Connected' : 'Disconnected';
+    })
+    .catch(error => {
+      console.error('Error fetching status:', error);
+      document.getElementById('ip-value').textContent = 'Error';
+      document.getElementById('version-value').textContent = 'Error';
+      document.getElementById('internet-connection-value').textContent = 'Error';
+    });
+    if (document.getElementById('internet-connection-value').textContent === 'Disconnected') {
+      document.getElementById('internet-connection-value').style.color = '#ff4c4c'; // red
+    } else {
+      document.getElementById('internet-connection-value').style.color = '#4cff4c'; // green
+    }
 </script>
 <script>
 // Select all tree nodes

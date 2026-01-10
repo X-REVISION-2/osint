@@ -11,6 +11,8 @@ import hashlib, subprocess, os
 import filetype
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
+from threading import Thread
+import psutil
 
 app = Flask(__name__, static_folder="frontend", static_url_path="")
 
@@ -21,6 +23,32 @@ app = Flask(__name__, static_folder="frontend", static_url_path="")
 def index():
     app.static_folder="./"
     return send_from_directory(app.static_folder, "index.html")
+
+# ---------------------- Status --------------------------
+@app.route("/status", methods=["GET"])
+def status():
+    # Get IP address
+    try:
+        ip_result = subprocess.run(["hostname", "-I"], capture_output=True, text=True, timeout=5)
+        ip_address = ip_result.stdout.strip().split()[0]  # take the first IP
+    except Exception:
+        ip_address = "Unavailable"
+
+    # Get version
+    version = "UHC OSINT v1.0"  # Example version
+
+    # Check internet connection
+    try:
+        subprocess.run(["ping", "-c", "1", "8.8.8.8"], capture_output=True, timeout=5)
+        internet_connection = "Connected"
+    except Exception:
+        internet_connection = "Disconnected"
+
+    return jsonify({
+        "ip": ip_address,
+        "version": version,
+        "internet_connection": internet_connection
+    })
 
 # ----------------------- NMAP --------------------------
 @app.route("/nmap", methods=["POST"])
@@ -75,7 +103,7 @@ def dig_lookup():
         return jsonify({"output": result.stdout})
     except Exception as e:
         return jsonify({"error": str(e)})
-
+        
 # -------------------- METADATA --------------------
 @app.route("/metadata", methods=["POST"])
 def metadata_extraction():
@@ -114,25 +142,48 @@ def open_chromium_app(url="http://127.0.0.1:5000"):
 # -----------------------------
 # Run App
 # -----------------------------
-if __name__ == "__main__":
-    # Launch server in a separate thread to avoid blocking
-    from threading import Thread
-    def run_flask():
-        app.run(debug=False, use_reloader=False)  # disable reloader
+def run_flask():
+    app.run(debug=False, use_reloader=False)
 
+def is_chromium_running(proc):
+    """Check if the Chromium process and its children are still alive"""
+    if proc.poll() is None:
+        return True
+    # Sometimes the parent process dies but children continue
+    try:
+        p = psutil.Process(proc.pid)
+        # Check if any child processes are still running
+        children = p.children(recursive=True)
+        return any(c.is_running() for c in children)
+    except psutil.NoSuchProcess:
+        return False
+if __name__ == "__main__":
+    # Start Flask in a separate thread
     t = Thread(target=run_flask)
     t.start()
 
-    # Give Flask a moment to start
-    time.sleep(1)
+    time.sleep(1)  # give Flask a moment
 
-    # Open Chromium in app mode
-    import subprocess
+    # Launch Chromium in app mode
     try:
-        subprocess.run([
+        chromium = subprocess.Popen([
             "chromium",  # or chromium-browser / google-chrome
             "--app=http://127.0.0.1:5000",
-            "--window-size=1200,800"
+            "--window-size=1200,800",
+            "--user-data-dir=/tmp/temp_chromium_profile"  # makes it isolated
+        ])
+        ttyd = subprocess.Popen([
+            "ttyd", "--interface", "127.0.0.1", "-p", "27681",
+            "-t", 'theme={"background": "black", "foreground": "white"}',
+            "--writable", "bash"
         ])
     except FileNotFoundError:
         print("Chromium not found. Open http://127.0.0.1:5000 manually.")
+
+    # Main loop
+    while True:
+        time.sleep(5)
+        if not is_chromium_running(chromium):
+            print("Chromium has exited. Shutting down server.")
+            ttyd.terminate()
+            os._exit(0)

@@ -42,7 +42,7 @@ canvas {
 /* --- Header --- */
 header {
     padding: 16px 24px;
-    background: rgba(72, 26, 137, 0.35);
+    background: #000;
     font-size: 1.4rem;
     letter-spacing: 1px;
 }
@@ -67,15 +67,16 @@ main {
 
 /* --- Panels --- */
 .panel {
-    background: rgba(72, 26, 137, 0.35);
-    border-radius: 8px;
-    padding: 14px;
+  background: #000;
+  border: 1px solid #6200ff;
+  border-radius: 8px;
+  padding: 14px;
 }
 
 .panel h2 {
-    margin: 0 0 10px;
-    font-size: 1.1rem;
-    color: #b388ff;
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  color: #6200ff;
 }
 
 /* --- Inputs --- */
@@ -84,7 +85,7 @@ input, select, button, textarea {
     margin-top: 6px;
     padding: 8px;
     background: #000;
-    border: 1px solid #673ab7;
+    border: 1px solid #6200ff;
     color: #fff;
     border-radius: 4px;
     font-family: inherit;
@@ -102,7 +103,7 @@ button {
 }
 
 button:hover {
-    background: #673ab7;
+    background: #6200ff;
     color: #000;
 }
 
@@ -121,24 +122,24 @@ button:hover {
     left: 0px;
     z-index: 999;
     padding: 18px 14px;
-    background: rgba(72, 26, 137, 0.55);
-    color: #9f8cff;
+    background: #000;
+    color: #6200ff;
     font-size: 18px;
     cursor: pointer;
     transition: all 0.25s ease;
-    border-right: #8844ff;
+    border-right: #6200ff;
     border-right-width: 2px;
     border-right-style: solid;
 }
 #home-a {
-        color: #9f8cff;
+        color: #6200ff;
         text-decoration: none;
 }
 #home-a:hover {
         color: #000;
 }
 #home-btn:hover {
-    background: #9f8cff;
+    background: #6200ff;
     color: #000;
 }
 
@@ -178,11 +179,11 @@ header {
 <canvas id="bg"></canvas>
 
 <div id="home-btn" title="Back to Navigator">
-    <a id="home-a" href="./index.html">H0ME</a>
+  H0ME
 </div>
 
 <div class="app">
-    <header>UHC Net Tools — Nmap</header>
+    <header>UHC Net Utils</header>
 
     <main>
         <!-- TOOLS -->
@@ -206,10 +207,16 @@ header {
     </main>
 </div>
 <script>
+document.getElementById('home-btn').onclick = () => {
+    window.location.href = './index.html';
+}
 /* ---------- Backend Calls ---------- */
 const output = document.getElementById("output");
 
 function show(data) {
+    if (JSON.stringify(data).startsWith("{\"output\":")) {
+        data = data.output;
+    }
     let s = (typeof data === "string") ? data : JSON.stringify(data, null, 2);
     // Convert escaped sequences (e.g. "\n") into real characters for display
     s = s.replace(/\\r/g, '\r').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
