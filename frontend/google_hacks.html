@@ -202,6 +202,12 @@ header {
     font-size: 1.4rem;
     letter-spacing: 1px;
 }
+#ghModifier {
+    height: 150px;
+}
+#ghQuery {
+    height:100px
+}
 </style>
 </head>
 
@@ -242,35 +248,27 @@ header {
                 </select>
 
                 <label for="ghQuery">Main Query</label>
-                <input type="text" id="ghQuery" placeholder='e.g. "admin login" or keywords' onkeydown="if(event.key==='Enter') runSearch()">
+                <input type="text" id="ghQuery" onkeydown="if(event.key==='Enter') runSearch()">
 
-                <label for="ghModifier" id="modLabel">Modifier (site, file ext, range, etc.)</label>
-                <input type="text" id="ghModifier" placeholder='e.g. example.com or pdf or 1990..2000'>
+                <label for="ghModifier" id="modLabel">Modifiers</label>
+                <input type="text" id="ghModifier">
 
                 <div class="row">
                     <div class="flex-30">
-                        <label class="small">Exact match quotes</label>
+                        <label class="small">Exact match</label>
                         <select id="ghQuotes">
                             <option value="no">No</option>
-                            <option value="yes">Wrap main query in quotes</option>
+                            <option value="yes">Yes</option>
                         </select>
                     </div>
                     <div class="flex-70">
-                        <label class="small">Language / Region (optional, google param)</label>
-                        <input id="ghLang" placeholder="e.g. en, uk, us (optional)">
+                        <label class="small">Language / Region</label>
+                        <input id="ghLang">
                     </div>
                 </div>
 
                 <button onclick="runSearch()">Search in iframe</button>
                 <button onclick="openNew()">Open in new tab</button>
-
-                <p class="small" style="margin-top:10px">
-                    Examples:
-                    site:example.com "index of" | filetype:pdf "confidential" | inurl:login admin
-                </p>
-                <div id="notice" class="small" style="margin-top:8px;color:#e0cfff">
-Results are loaded into the iframe; some sites (including Google) may block embedding. Use "Open in new tab" if empty.
-                </div>
             </div>
 
         </div>
@@ -306,8 +304,8 @@ function updateHelper(){
     const t = document.getElementById('ghType').value;
     const label = document.getElementById('modLabel');
     const mod = document.getElementById('ghModifier');
-    label.textContent = 'Modifier (site, file ext, range, etc.)';
-    mod.placeholder = 'e.g. example.com or pdf or 1990..2000';
+    label.textContent = 'Modifiers';
+    mod.placeholder = '';
     if (t === 'site') {
         mod.placeholder = 'e.g. example.com';
     } else if (t === 'filetype') {

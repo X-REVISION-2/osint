@@ -2460,7 +2460,13 @@ document.querySelectorAll('.tree .node').forEach(node => {
     .then(data => {
       document.getElementById('ip-value').textContent = data.ip || 'N/A';
       document.getElementById('version-value').textContent = data.version || 'N/A';
-      document.getElementById('internet-connection-value').textContent = data.internet_connection ? 'Connected' : 'Disconnected';
+      document.getElementById('internet-connection-value').textContent = data.internet_connection || 'N/A';
+      console.log(data.internet_connection)
+      if (data.internet_connection.startsWith('Dis')) {
+        document.getElementById('internet-connection-value').style.color = '#ff4c4c'; // red
+      } else {
+        document.getElementById('internet-connection-value').style.color = '#4cff4c'; // green
+      }
     })
     .catch(error => {
       console.error('Error fetching status:', error);
@@ -2468,11 +2474,7 @@ document.querySelectorAll('.tree .node').forEach(node => {
       document.getElementById('version-value').textContent = 'Error';
       document.getElementById('internet-connection-value').textContent = 'Error';
     });
-    if (document.getElementById('internet-connection-value').textContent === 'Disconnected') {
-      document.getElementById('internet-connection-value').style.color = '#ff4c4c'; // red
-    } else {
-      document.getElementById('internet-connection-value').style.color = '#4cff4c'; // green
-    }
+
 </script>
 <script>
 // Select all tree nodes
