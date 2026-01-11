@@ -20,7 +20,6 @@ body {
   background: #000;
   color: #fff;
   font-family: "0xProto", monospace;
-  overflow: hidden;
 }
 
 /* ---------- Background ---------- */
@@ -53,7 +52,6 @@ main {
   grid-template-columns: minmax(400px, 55%) 1fr;
   gap: 16px;
   padding: 16px;
-  overflow: hidden;
 }
 
 /* ---------- Panels ---------- */
@@ -61,7 +59,6 @@ main {
   background: #000;
   border: 1px solid #6200ff;
   border-radius: 8px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -143,7 +140,6 @@ main {
 /* ALL nested ULs are collapsed by default */
 .tree ul {
   max-height: 0;
-  overflow: hidden;
   opacity: 0;
   transition: max-height 0.35s ease, opacity 0.25s ease;
   padding-left: 20px;
@@ -204,6 +200,9 @@ main {
   text-align: right;
   display: block;
 }
+.root-node {
+  width:96.5%;
+}
 </style>
 </head>
 
@@ -224,7 +223,7 @@ main {
           <div class="tree-container">
           <ul class="tree">
           <li>
-          <a class="node">ARF.JS0N</a>
+          <a class="node root-node">ARF.JS0N</a>
           <ul>
           <li>
           <a class="node">Username</a>
@@ -2396,11 +2395,12 @@ main {
           </li>
           </ul>
           </li>
-          <li><a class="node" href="./web_utils.html">Web Utils</a></li>
-          <li><a class="node" href="./net_tools.html">Network Tools</a></li>
-          <li><a class="node" href="./file_utils.html">File Utils</a></li>
-          <li><a class="node" href="./google_hacks.html">Google Hacks</a></li>
-          <li><a class="node" href="./shell.html">Shell</a></li>
+          <li><a class="node root-node" href="./web_utils.html">Web Utils</a></li>
+          <li><a class="node root-node" href="./net_tools.html">Network Tools</a></li>
+          <li><a class="node root-node" href="./file_utils.html">File Utils</a></li>
+          <li><a class="node root-node" href="./google_hacks.html">Google Hacks</a></li>
+          <li><a class="node root-node" href="./shell.html">Shell</a></li>
+          <li><a class="node root-node" onclick="changeAbout(ilo)">Image > Location</a></li>
           </ul>
           </div>
 
@@ -2438,6 +2438,44 @@ main {
 </div>
 
 <script>
+
+const ilo = `
+  Image > Location
+
+  To find the geographical location where an image was taken, you can identify physical features within the image, such as buildings, landmarks, street signs, or number plates.
+
+  Physical features:
+
+  - Buildings: Look for unique architectural styles, building names, or logos that can help identify the location.
+
+  - Landmarks: Identify any well-known landmarks, monuments, or natural features that can provide clues about the location.
+
+  - Street Signs: Look for street names, traffic signs, or other signage that can help narrow down the location.
+
+  - Number Plates: If vehicles are present, check for license plates that may indicate the country or region.
+
+  - Clothing and Language: Observe any text on clothing, advertisements, or signs that may indicate the local language or culture.
+
+  - Vegetation and Environment: Analyze the type of vegetation, weather conditions, and overall environment to infer the geographical region.
+
+  - Shadows and Sun Position: The angle of shadows can help determine the time of day and cardinal direction, which may assist in location identification.
+
+  - Electrical outlets: The type of electrical outlets visible in the image can provide clues about the country or region.
+
+  - Public Transportation: Look for buses, trams, or trains with identifiable markings or logos that can indicate the location.
+
+
+  This tool does not provide 100% acccurate results, but can give you an approximation of where the image was taken.
+
+  The more identifiable features you can spot in the image, the better the chances of accurately determining the location.
+
+  To improve accuracy, consider using reverse image search engines or specialized geolocation tools that can analyze the image and provide potential matches based on visual similarities and metadata.
+
+  This tool does not provide information for the stated features, therefore you will need to manually analyze the image for these features, and find them online.
+`;
+function changeAbout(text) {
+  document.getElementById('about-panel').textContent = text;
+}
 document.querySelectorAll('.tree .node').forEach(node => {
   node.addEventListener('click', e => {
     const li = node.parentElement;
