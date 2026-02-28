@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UHC WiGLE OSINT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css" 
+      integrity="sha256-sA+e2x0wX0yc2hwFBs8cYvC6k3wZ1sTbZ+g8A4b4hjo=" crossorigin=""/>
+
+<style>
+@font-face {
+    font-family: "0xProto";
+    src: url("https://humantooth.neocities.org/fonts/0xProto-Regular.woff2") format("woff2");
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: "0xProto", monospace;
+    overflow: hidden;
+}
+
+/* --- Background Canvas --- */
+canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+/* --- App Grid --- */
+.app {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    padding-top: 80px;
+}
+
+/* --- Header --- */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px 24px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    background: #000;
+    z-index: 100;
+    font-size: 1.4rem;
+}
+
+/* --- Main Layout --- */
+main {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 16px;
+    padding: 16px;
+    overflow: hidden;
+}
+
+/* --- Tool Grid --- */
+.tools {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* --- Panels --- */
+.panel {
+  background: #000;
+  border: 1px solid #6200ff;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  color: #6200ff;
+}
+
+/* --- Inputs --- */
+input, select, button, textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px;
+    background: #000;
+    border: 1px solid #6200ff;
+    color: #fff;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+button {
+    margin-top: 10px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+button:hover {
+    background: #6200ff;
+    color: #000;
+}
+
+/* --- Output / Map --- */
+#map {
+    width: 100%;
+    height: calc(100vh - 100px);
+    border: 1px solid #6200ff;
+    border-radius: 8px;
+    background: #000;
+}
+
+/* --- Status --- */
+#status {
+    color: #d9c9ff;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    overflow-y: auto;
+}
+
+/* --- Home button --- */
+#home-btn {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 999;
+    padding: 18px 14px;
+    background: #000;
+    color: #6200ff;
+    font-size: 18px;
+    cursor: pointer;
+    border-right: 2px solid #6200ff;
+}
+
+#home-btn:hover {
+    background: #6200ff;
+    color: #000;
+}
+</style>
+</head>
+
+<body>
+<canvas id="bg"></canvas>
+
+<div id="home-btn" title="Back to Navigator">H0ME</div>
+
+<div class="app">
+    <header>UHC WiGLE OSINT — WiFi Map</header>
+
+    <main>
+        <!-- TOOLS -->
+        <div class="tools">
+            <div class="panel">
+                <h2>WiGLE Query</h2>
+                <label for="ssid">SSID</label>
+                <input type="text" id="ssid" placeholder="Enter WiFi SSID">
+                <button onclick="runWigleQuery()">Search</button>
+                <div id="status">Enter SSID to start.</div>
+            </div>
+        </div>
+
+        <!-- OUTPUT / MAP -->
+        <div id="map"></div>
+    </main>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js" 
+        integrity="sha256-gZ0GI5Z1uhg+e5IVf5v5NodQmW1l0ZkI1GMWa6mzo6A=" crossorigin=""></script>
+
+<script>
+document.getElementById('home-btn').onclick = () => {
+    window.location.href = './index.html';
+}
+
+// Initialize map
+const map = L.map('map').setView([37.7749, -122.4194], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+let markers = [];
+
+// Run WiGLE query
+async function runWigleQuery() {
+    const ssid = document.getElementById('ssid').value.trim();
+    const status = document.getElementById('status');
+
+    if (!ssid) {
+        alert("Please enter an SSID.");
+        return;
+    }
+
+    status.textContent = "Querying WiGLE...";
+
+    try {
+        const resp = await fetch(`/wigle?ssid=${encodeURIComponent(ssid)}`);
+        const data = await resp.json();
+
+        if (data.error) {
+            status.textContent = "Error: " + data.error;
+            return;
+        }
+
+        // Clear previous markers
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        const networks = data.results || data?.networks || [];
+        if (networks.length === 0) {
+            status.textContent = "No networks found.";
+            return;
+        }
+
+        networks.forEach(net => {
+            if (net.trilat && net.trilong) {
+                const marker = L.marker([net.trilat, net.trilong])
+                    .bindPopup(`<b>${net.ssid}</b><br>MAC: ${net.netid || ''}`);
+                marker.addTo(map);
+                markers.push(marker);
+            }
+        });
+
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+
+        status.textContent = `Found ${markers.length} networks.`;
+    } catch (err) {
+        console.error(err);
+        status.textContent = "Query failed: " + err.message;
+    }
+}
+</script>
+</body>
+</html>

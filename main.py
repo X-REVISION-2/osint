@@ -197,8 +197,8 @@ def wigle_query():
         return jsonify({"error": "No SSID provided"}), 400
 
     # WiGLE API credentials — store safely!
-    WIGLE_API_NAME = "x"
-    WIGLE_API_TOKEN = "x"
+    WIGLE_API_NAME = "AID01a0093072a885bbf0270933683bcb1b"
+    WIGLE_API_TOKEN = "210d6e2d10d9a7c13cf8559eba8fede6"
 
     url = "https://api.wigle.net/api/v2/network/search"
     params = {"ssid": ssid, "resultsPerPage": 50}
