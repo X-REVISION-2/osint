@@ -11,6 +11,7 @@ from threading import Thread
 import psutil
 import shutil
 import filetype
+import requests
 from PIL import Image
 from PIL.ExifTags import TAGS
 
@@ -185,6 +186,29 @@ def metadata_extraction():
         return jsonify({"metadata": exif_data})
     except Exception as e:
         return jsonify({"error": str(e)})
+    
+# -------------------------------------------------
+# WiGLE Query Endpoint
+# -------------------------------------------------
+@app.route("/wigle", methods=["GET"])
+def wigle_query():
+    ssid = request.args.get("ssid")
+    if not ssid:
+        return jsonify({"error": "No SSID provided"}), 400
+
+    # WiGLE API credentials — store safely!
+    WIGLE_API_NAME = "x"
+    WIGLE_API_TOKEN = "x"
+
+    url = "https://api.wigle.net/api/v2/network/search"
+    params = {"ssid": ssid, "resultsPerPage": 50}
+
+    try:
+        r = requests.get(url, params=params, auth=(WIGLE_API_NAME, WIGLE_API_TOKEN), timeout=10)
+        r.raise_for_status()
+        return jsonify(r.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # -------------------------------------------------
 # Chromium Launcher
