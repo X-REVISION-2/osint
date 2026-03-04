@@ -1,6 +1,8 @@
 # UHC Osint
 A chromium based osint platform, designed for linux.
 
+<img src="/osint.png"></img>
+
 ## Dependencies
 dig, whois, python3, chromium
 
